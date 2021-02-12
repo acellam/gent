@@ -1,0 +1,28 @@
+sudo: required
+language: node_js
+node_js:
+    - "14"
+addons:
+    apt:
+        sources:
+            - google-chrome
+        packages:
+            - google-chrome-stable
+before_install:
+    - npm i -g npm
+    - npm install grunt-cli -g
+    - npm install codecov -g
+    - export CHROME_BIN=chromium-browser
+    - export DISPLAY=:99.0
+    - sudo apt-get -qq update
+    - npm --version
+services:
+- mongodb
+- xvfb
+cache:
+    directories:
+        - "node_modules"
+    yarn: true
+after_success:
+- npm run upload_coverage
+- bash <(curl -s https://codecov.io/bash) -f coverage/coverage-final.json
