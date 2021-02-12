@@ -7,12 +7,10 @@ import { ApolloServer } from 'apollo-server-express';
 
 import database from "./config/database";
 import winston, { logger } from "./config/winston";
-import { Api } from "./api";
 import schema from './graphql/schema/index';
 
 export class App {
     public express!: express.Application;
-    public api: Api = new Api();
     public session!: express.RequestHandler;
     public httpServer!: http.Server;
     public server: ApolloServer = new ApolloServer(schema);
