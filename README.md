@@ -12,7 +12,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![code style: Tslint Latest](https://img.shields.io/badge/tslint_rules-latest-ff69b4.svg?style=flat-square)](https://github.com/buzinas/tslint-eslint-rules)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmistaguy%2Fgent.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmistaguy%2Fgent?ref=badge_shield)
-[![MIT License, Version 2.0](https://img.shields.io/badge/Mit-blue.svg)](http://opensource.org/licenses/MIT)
+[![MIT License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://opensource.org/licenses/MIT)
 
 # GENT
 A GraphQL backend boilerplate for MongoDB  ExpressJs Typescript NodeJs App

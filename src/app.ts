@@ -3,16 +3,19 @@ import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import * as morgan from "morgan";
 import * as http from "http";
+import { ApolloServer } from 'apollo-server-express';
 
 import database from "./config/database";
 import winston, { logger } from "./config/winston";
 import { Api } from "./api";
+import schema from './graphql/schema/index';
 
 export class App {
     public express!: express.Application;
     public api: Api = new Api();
     public session!: express.RequestHandler;
-    public server!: http.Server;
+    public httpServer!: http.Server;
+    public server: ApolloServer = new ApolloServer(schema);
 
     constructor() {
         try {
@@ -21,7 +24,7 @@ export class App {
             this.express = express();
             this.config();
             database.start();
-            this.api.routes(this);
+            // this.api.routes(this);
         } catch (error) {
             logger.log("error", `App: Some weirdo error happened :( ", ${error}`);
         }
@@ -38,7 +41,10 @@ export class App {
         this.express.enable("trust proxy");
         // set up logging
         this.express.use(morgan("combined", { stream: winston.stream } as any));
-        this.server = http.createServer(this.express);
+        this.server.applyMiddleware({ app: this.express });
+        this.httpServer = http.createServer(this.express);
+        // Install subscription handlers
+        this.server.installSubscriptionHandlers(this.httpServer);
     }
 }
 
