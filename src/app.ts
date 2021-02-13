@@ -3,24 +3,23 @@ import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import * as morgan from "morgan";
 import * as http from "http";
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, ApolloServerExpressConfig } from 'apollo-server-express';
 
 import database from "./config/database";
 import winston, { logger } from "./config/winston";
-import schema from './graphql/schema/index';
+import typeDefs from "./graphql/schema/index";
+import rootResolver from "./graphql/resolvers";
 
 export class App {
     public express!: express.Application;
     public session!: express.RequestHandler;
     public httpServer!: http.Server;
-    public server: ApolloServer = new ApolloServer(schema);
-
+    public server!: ApolloServer;
     constructor() {
         try {
-            // tslint:disable-next-line
-            // if (process.env.NODE_ENV === 'development') console.log = () => null; // allow console
+            this.server = new ApolloServer(this.getAppoloConfig());
             this.express = express();
-            this.config();
+            this.setUp();
             database.start();
             // this.api.routes(this);
         } catch (error) {
@@ -28,7 +27,22 @@ export class App {
         }
     }
 
-    private config(): void {
+    private getAppoloConfig= (): ApolloServerExpressConfig => {
+        return {
+            typeDefs,
+            resolvers: rootResolver,
+            introspection: true,
+            context: async ({req, connection, payload}: any) => {
+                if (connection) {
+                    return {isAuth: payload.authToken};
+                }
+                return {isAuth: req.isAuth};
+            },
+            playground: true
+        };
+    }
+
+    private setUp = ()=> {
         // make sure that the environment is set
         dotenv.config();
         // support application/json type post data

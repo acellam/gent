@@ -29,9 +29,9 @@ const UserQueries = {
             throw err;
         }
     },
-    login: async (_parent: any, { email, password }: any) => {
+    login: async (_parent: any, { username, password }: any) => {
         try {
-            const user: any = await User.findOne({ email, password });
+            const user: any = await User.findOne({ username, password });
             if (!user) {
                 throw new Error('User does not Exists');
             }
@@ -54,14 +54,14 @@ const UserMutation = {
     createUser: async (_parent: any, { userInput }: any) => {
         try {
             const user = await User.findOne({
-                email: userInput.email
+                username: userInput.username
             });
             if (user) {
                 throw new Error('User already Exists');
             } else {
                 const newUser = new User({
                     _id: new mongoose.Types.ObjectId(),
-                    email: userInput.email,
+                    username: userInput.username,
                     name: userInput.name,
                     password: userInput.password
                 });
