@@ -3,22 +3,21 @@ import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import * as morgan from "morgan";
 import * as http from "http";
-import { ApolloServer, ApolloServerExpressConfig } from 'apollo-server-express';
+import * as expressJwt from "express-jwt";
+import { graphqlHTTP } from "express-graphql";
 
 import database from "./config/database";
 import winston, { logger } from "./config/winston";
-import typeDefs from "./graphql/schema/index";
-import rootResolver from "./graphql/resolvers";
+import schema from "./graphql/schema";
+import rootValue from "./graphql/resolvers";
 
 export class App {
     public express!: express.Application;
     public session!: express.RequestHandler;
     public httpServer!: http.Server;
-    public server!: ApolloServer;
+
     constructor() {
         try {
-            this.server = new ApolloServer(this.getAppoloConfig());
-            this.express = express();
             this.setUp();
             database.start();
             // this.api.routes(this);
@@ -27,22 +26,8 @@ export class App {
         }
     }
 
-    private getAppoloConfig= (): ApolloServerExpressConfig => {
-        return {
-            typeDefs,
-            resolvers: rootResolver,
-            introspection: true,
-            context: async ({req, connection, payload}: any) => {
-                if (connection) {
-                    return {isAuth: payload.authToken};
-                }
-                return {isAuth: req.isAuth};
-            },
-            playground: true
-        };
-    }
-
-    private setUp = ()=> {
+    private setUp = () => {
+        this.express = express();
         // make sure that the environment is set
         dotenv.config();
         // support application/json type post data
@@ -51,12 +36,31 @@ export class App {
         this.express.use(bodyParser.urlencoded({ extended: false }));
         // so we can get the client's IP address
         this.express.enable("trust proxy");
+        // set up authentication
+        this.express.use(this.auth());
+        // set up graphql
+        this.express.use(
+            "/graphql",
+            graphqlHTTP(async (request: any, _response, _graphQLParams) => ({
+                schema,
+                rootValue,
+                graphiql: true,
+                context: {
+                    user: request.user
+                }
+            }))
+        );
         // set up logging
         this.express.use(morgan("combined", { stream: winston.stream } as any));
-        this.server.applyMiddleware({ app: this.express });
         this.httpServer = http.createServer(this.express);
-        // Install subscription handlers
-        this.server.installSubscriptionHandlers(this.httpServer);
+    }
+
+    private auth() {
+        return expressJwt({
+            secret: String(process.env.JWT_SECRET),
+            algorithms: [ "HS256" ],
+            credentialsRequired: false
+        });
     }
 }
 

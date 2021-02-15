@@ -3,7 +3,7 @@ import * as supertest from "supertest";
 import { IUserDocument, User } from "../models/user";
 import app from "../app";
 
-export const request = supertest(app.server);
+export const request = supertest(app.express);
 
 const testUser = { username: "testuser", password: "mytestpass" };
 

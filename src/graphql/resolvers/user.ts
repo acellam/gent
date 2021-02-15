@@ -1,13 +1,7 @@
 // tslint:disable
-import { PubSub } from 'apollo-server';
 import User from '../../models/user';
 import * as mongoose from "mongoose";
 import * as jwt from 'jsonwebtoken';
-
-const pubsub = new PubSub();
-
-const USER_ADDED = 'USER_ADDED';
-
 
 // User Queries
 const UserQueries = {
@@ -66,9 +60,6 @@ const UserMutation = {
                     password: userInput.password
                 });
                 const savedUser = await newUser.save();
-                pubsub.publish(USER_ADDED, {
-                    userAdded: savedUser
-                });
                 const token = jwt.sign({ userId: savedUser.id }, String(process.env.JWT_SECRET), {
                     expiresIn: '1h'
                 });
@@ -98,11 +89,4 @@ const UserMutation = {
     }
 };
 
-// User Subscriptions
-const UserSubscription = {
-    userAdded: {
-        subscribe: () => pubsub.asyncIterator([USER_ADDED])
-    }
-};
-
-export { UserQueries, UserMutation, UserSubscription };
+export { UserQueries, UserMutation };

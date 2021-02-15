@@ -1,18 +1,8 @@
-import { UserMutation, UserQueries, UserSubscription } from './user';
+import { UserMutation, UserQueries } from "./user";
 
-const rootResolver = {
-    Query: {
-        ...UserQueries
-        // Add other queries here
-    },
-    Mutation: {
-        ...UserMutation
-        // Add other mutations here
-    },
-    Subscription: {
-        ...UserSubscription
-        // Add other subscriptions here
-    }
+const rootValue = {
+    ...UserQueries,
+    ...UserMutation
 };
 
-export default rootResolver;
+export default rootValue;
